@@ -2,18 +2,27 @@ package com.lucian.urlshortener.controller;
 
 import com.lucian.urlshortener.dto.UrlRequest;
 import com.lucian.urlshortener.dto.UrlResponse;
+import com.lucian.urlshortener.entity.UrlMapping;
+import com.lucian.urlshortener.service.UrlShortenerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
+@AllArgsConstructor
+@Slf4j
 public class UrlShortenerController {
+
+  private final UrlShortenerService urlShortenerService;
 
   @Operation(
       summary = "Shorten a URL",
@@ -29,7 +38,15 @@ public class UrlShortenerController {
   @PostMapping("/shorten")
   public ResponseEntity<UrlResponse> shortenUrl(@RequestBody @Valid UrlRequest request) {
     // return 201 or 400
-    return ResponseEntity.ok(new UrlResponse("alias", "fullUrl", "shortUrl"));
+    UrlMapping urlMapping =
+        urlShortenerService.createShortUrl(request.fullUrl(), Optional.ofNullable(request.alias()));
+    UrlResponse response =
+        UrlResponse.builder()
+            .shortUrl(urlMapping.getShortUrl())
+            .fullUrl(urlMapping.getFullUrl())
+            .alias(urlMapping.getAlias())
+            .build();
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @GetMapping("/{alias}")

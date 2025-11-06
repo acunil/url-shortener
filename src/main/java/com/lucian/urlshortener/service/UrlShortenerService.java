@@ -2,12 +2,11 @@ package com.lucian.urlshortener.service;
 
 import com.lucian.urlshortener.entity.UrlMapping;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
+import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -18,7 +17,12 @@ public class UrlShortenerService {
 
   public UrlMapping createShortUrl(String fullUrl, Optional<String> alias) {
     // validate, check for alias duplication, generate shortUrl
-    return null;
+    String shortUrl = "https://short.url"; // placeholder
+    return UrlMapping.builder()
+        .shortUrl(shortUrl)
+        .fullUrl(fullUrl)
+        .alias(alias.orElse(null))
+        .build();
   }
 
   public UrlMapping getByAlias(String alias) {
