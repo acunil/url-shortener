@@ -6,26 +6,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucian.urlshortener.dto.UrlRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ActiveProfiles("test")
 @Transactional
 class UrlShortenerControllerTest {
 
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
-
-  @BeforeEach
-  void setUp() {}
 
   @Test
   void shortenUrl_ValidRequest_ReturnsCreated() throws Exception {
@@ -36,6 +32,6 @@ class UrlShortenerControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.fullUrl").value("https://www.example.com"))
         .andExpect(jsonPath("$.alias").value("myAlias"))
-        .andExpect(jsonPath("$.shortUrl").exists());
+        .andExpect(jsonPath("$.shortUrl").value("http://localhost/myAlias"));
   }
 }
