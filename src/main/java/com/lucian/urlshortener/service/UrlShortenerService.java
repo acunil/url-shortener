@@ -43,6 +43,7 @@ public class UrlShortenerService {
 
     if (customAliasOpt.isPresent()) {
       String requestedAlias = customAliasOpt.get();
+      log.info("Custom alias requested: {}", requestedAlias);
       validateCustomAlias(requestedAlias);
       return saveMapping(requestedAlias, normalizedUrl);
     }
@@ -77,6 +78,7 @@ public class UrlShortenerService {
   }
 
   private void validateCustomAlias(String alias) {
+    log.info("Validating custom alias: {}", alias);
     if (!alias.matches(ALIAS_REGEX)) {
       throw new InvalidAliasException(alias);
     }
@@ -90,6 +92,7 @@ public class UrlShortenerService {
   }
 
   private String normalizeAndValidateUrl(String url) {
+    log.info("Normalizing and validating URL: {}", url);
     try {
       URI uri = new URI(url);
       if (uri.getScheme() == null) {
@@ -106,6 +109,7 @@ public class UrlShortenerService {
   }
 
   private UrlMapping saveMapping(String alias, String fullUrl) {
+    log.info("Saving URL mapping: {} -> {}", alias, fullUrl);
     String shortUrl =
         UriComponentsBuilder.fromUriString(baseUrl).pathSegment(alias).build().toUriString();
     UrlMapping mapping =

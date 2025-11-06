@@ -38,8 +38,10 @@ public class UrlShortenerController {
   @PostMapping("/shorten")
   public ResponseEntity<UrlResponse> shortenUrl(@RequestBody @Valid UrlRequest request) {
     // return 201 or 400
+    log.info(
+        "Received shorten URL request for {} with customAlias '{}'", request.fullUrl(), request.customAlias());
     UrlMapping urlMapping =
-        urlShortenerService.createShortUrl(request.fullUrl(), Optional.ofNullable(request.alias()));
+        urlShortenerService.createShortUrl(request.fullUrl(), Optional.ofNullable(request.customAlias()));
     UrlResponse response =
         UrlResponse.builder()
             .shortUrl(urlMapping.getShortUrl())

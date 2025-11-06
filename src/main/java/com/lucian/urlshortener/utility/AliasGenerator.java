@@ -1,11 +1,12 @@
 package com.lucian.urlshortener.utility;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 
-//@AllArgsConstructor
+@Slf4j
 @Component
 public final class AliasGenerator {
 
