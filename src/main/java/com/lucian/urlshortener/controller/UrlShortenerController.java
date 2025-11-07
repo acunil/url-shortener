@@ -4,12 +4,12 @@ import com.lucian.urlshortener.dto.UrlRequest;
 import com.lucian.urlshortener.dto.UrlResponse;
 import com.lucian.urlshortener.entity.UrlMapping;
 import com.lucian.urlshortener.service.UrlShortenerService;
+import com.lucian.urlshortener.utility.Mapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-
 import java.net.URI;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -39,16 +39,12 @@ public class UrlShortenerController {
   @PostMapping("/shorten")
   public ResponseEntity<UrlResponse> shortenUrl(@RequestBody @Valid UrlRequest request) {
     log.info(
-        "Received shorten URL request for {} with customAlias '{}'", request.fullUrl(), request.customAlias());
+        "Received shorten URL request for {} with customAlias '{}'",
+        request.fullUrl(),
+        request.customAlias());
     UrlMapping urlMapping =
         urlShortenerService.createShortUrl(request.fullUrl(), request.customAlias());
-    UrlResponse response =
-        UrlResponse.builder()
-            .shortUrl(urlMapping.getShortUrl())
-            .fullUrl(urlMapping.getFullUrl())
-            .alias(urlMapping.getAlias())
-            .build();
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    return ResponseEntity.status(HttpStatus.CREATED).body(Mapper.toUrlResponse(urlMapping));
   }
 
   @Operation(
@@ -74,9 +70,20 @@ public class UrlShortenerController {
     return ResponseEntity.noContent().build();
   }
 
+  @Operation(
+      summary = "List all URL mappings",
+      description = "Retrieves a list of all URL mappings.")
+  @ApiResponse(
+      responseCode = "200",
+      description = "List of URL mappings",
+      content =
+          @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = UrlResponse[].class)))
   @GetMapping("/urls")
   public ResponseEntity<List<UrlResponse>> listAll() {
-    // return all mappings
-    return null;
+    List<UrlMapping> mappings = urlShortenerService.listAll();
+    List<UrlResponse> responses = mappings.stream().map(Mapper::toUrlResponse).toList();
+    return ResponseEntity.ok(responses);
   }
 }

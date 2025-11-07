@@ -8,7 +8,7 @@ import com.lucian.urlshortener.utility.UrlUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,8 @@ public class UrlShortenerService {
     this.aliasGenerator = aliasGenerator;
     this.baseUrl = baseUrl;
   }
+
+  public static final Set<String> RESERVED_ALIAS = Set.of("urls", "shorten");
 
   public static final String ALIAS_REGEX = "[A-Za-z0-9\\-_]{3,64}";
   private static final int MAX_GENERATION_ATTEMPTS = 5;
@@ -69,7 +71,8 @@ public class UrlShortenerService {
   }
 
   public List<UrlMapping> listAll() {
-    return null;
+    log.info("Listing all URL mappings");
+    return urlMappingRepository.findAll();
   }
 
   private String generateUniqueAlias() {
@@ -83,6 +86,9 @@ public class UrlShortenerService {
 
   private void validateCustomAlias(String alias) {
     log.info("Validating custom alias: {}", alias);
+    if (RESERVED_ALIAS.contains(alias.toLowerCase())) {
+      throw new ReservedAliasException(alias);
+    }
     if (!alias.matches(ALIAS_REGEX)) {
       throw new InvalidAliasException(alias);
     }

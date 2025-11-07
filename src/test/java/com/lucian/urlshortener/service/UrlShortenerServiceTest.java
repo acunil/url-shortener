@@ -9,6 +9,7 @@ import com.lucian.urlshortener.entity.UrlMapping;
 import com.lucian.urlshortener.exception.AliasCollisionException;
 import com.lucian.urlshortener.exception.AliasNotFoundException;
 import com.lucian.urlshortener.exception.DuplicateAliasException;
+import com.lucian.urlshortener.exception.ReservedAliasException;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -130,6 +133,20 @@ class UrlShortenerServiceTest {
     assertThat(logCaptor.getInfoLogs()).containsExactly("Generating unique alias");
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"urls", "shorten"})
+  void testCreateShortUrl_ReservedAlias(String reservedAlias) {
+    assertThatThrownBy(() -> urlShortenerService.createShortUrl(FULL_URL, reservedAlias))
+        .isInstanceOf(ReservedAliasException.class)
+        .hasMessage("Alias is reserved and cannot be used: " + reservedAlias);
+
+    verifyNoInteractions(urlMappingRepository);
+    assertThat(logCaptor.getInfoLogs())
+        .containsExactly(
+            "Custom alias requested: " + reservedAlias,
+            "Validating custom alias: " + reservedAlias);
+  }
+
   @Test
   void testGetByAlias_found() {
     UrlMapping urlMapping =
@@ -144,7 +161,8 @@ class UrlShortenerServiceTest {
 
     assertThat(result).isEqualTo(urlMapping);
     verify(urlMappingRepository).findById(REQUESTED_ALIAS);
-    assertThat(logCaptor.getInfoLogs()).containsExactly("Retrieving URL mapping for alias: myAlias");
+    assertThat(logCaptor.getInfoLogs())
+        .containsExactly("Retrieving URL mapping for alias: myAlias");
   }
 
   @Test
@@ -156,7 +174,8 @@ class UrlShortenerServiceTest {
         .hasMessage("Alias not found: " + REQUESTED_ALIAS);
 
     verify(urlMappingRepository).findById(REQUESTED_ALIAS);
-    assertThat(logCaptor.getInfoLogs()).containsExactly("Retrieving URL mapping for alias: myAlias");
+    assertThat(logCaptor.getInfoLogs())
+        .containsExactly("Retrieving URL mapping for alias: myAlias");
   }
 
   @Test
@@ -165,8 +184,7 @@ class UrlShortenerServiceTest {
     urlShortenerService.deleteByAlias(REQUESTED_ALIAS);
     verify(urlMappingRepository).existsByAlias(REQUESTED_ALIAS);
     verify(urlMappingRepository).deleteById(REQUESTED_ALIAS);
-    assertThat(logCaptor.getInfoLogs())
-        .containsExactly("Deleting URL mapping for alias: myAlias");
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Deleting URL mapping for alias: myAlias");
   }
 
   @Test
