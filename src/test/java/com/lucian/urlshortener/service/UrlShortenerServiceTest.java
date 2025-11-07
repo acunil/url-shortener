@@ -25,7 +25,8 @@ class UrlShortenerServiceTest {
 
   UrlShortenerService urlShortenerService;
   @Mock UrlMappingRepository urlMappingRepository;
-  @Mock AliasGenerator aliasGenerator;
+  @Mock
+  AliasGenerator aliasGenerator;
   final LogCaptor logCaptor = LogCaptor.forClass(UrlShortenerService.class);
 
   static final String REQUESTED_ALIAS = "myAlias";

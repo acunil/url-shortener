@@ -1,9 +1,6 @@
 package com.lucian.urlshortener.handler;
 
-import com.lucian.urlshortener.exception.AliasGenerationFailureException;
-import com.lucian.urlshortener.exception.AliasNotFoundException;
-import com.lucian.urlshortener.exception.DuplicateAliasException;
-import com.lucian.urlshortener.exception.InvalidAliasException;
+import com.lucian.urlshortener.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +26,11 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(InvalidAliasException.class)
   public ResponseEntity<String> handleInvalidAlias(InvalidAliasException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  }
+
+  @ExceptionHandler(InvalidUrlException.class)
+  public ResponseEntity<String> handleInvalidUrl(InvalidUrlException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
 

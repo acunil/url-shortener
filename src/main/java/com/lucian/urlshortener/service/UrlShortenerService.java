@@ -1,17 +1,15 @@
 package com.lucian.urlshortener.service;
 
 import com.lucian.urlshortener.entity.UrlMapping;
-import com.lucian.urlshortener.exception.AliasCollisionException;
-import com.lucian.urlshortener.exception.AliasGenerationFailureException;
-import com.lucian.urlshortener.exception.DuplicateAliasException;
-import com.lucian.urlshortener.exception.InvalidAliasException;
+import com.lucian.urlshortener.exception.*;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
-import java.net.URI;
-import java.net.URISyntaxException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import com.lucian.urlshortener.utility.UrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,7 +38,7 @@ public class UrlShortenerService {
 
   @Transactional
   public UrlMapping createShortUrl(String fullUrl, Optional<String> customAliasOpt) {
-    String normalizedUrl = normalizeAndValidateUrl(fullUrl);
+    String normalizedUrl = UrlUtils.normalizeAndValidateUrl(fullUrl);
 
     if (customAliasOpt.isPresent()) {
       String requestedAlias = customAliasOpt.get();
@@ -90,23 +88,6 @@ public class UrlShortenerService {
 
   private boolean aliasExists(String candidate) {
     return urlMappingRepository.existsByAlias(candidate);
-  }
-
-  private String normalizeAndValidateUrl(String url) {
-    log.info("Normalizing and validating URL: {}", url);
-    try {
-      URI uri = new URI(url);
-      if (uri.getScheme() == null) {
-        uri = new URI("https://" + url);
-      }
-      if (uri.getHost() == null) throw new IllegalArgumentException("URL must include a host");
-      String scheme = uri.getScheme().toLowerCase();
-      if (!scheme.equals("http") && !scheme.equals("https"))
-        throw new IllegalArgumentException("Unsupported URL scheme");
-      return uri.toString();
-    } catch (URISyntaxException e) {
-      throw new IllegalArgumentException("Invalid URL", e);
-    }
   }
 
   private UrlMapping saveMapping(String alias, String fullUrl) {
