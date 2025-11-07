@@ -1,5 +1,6 @@
 package com.lucian.urlshortener.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -131,6 +132,36 @@ class UrlShortenerControllerTest {
     mockMvc
         .perform(
             get("/nonExistingAlias")
+                .contentType(APPLICATION_JSON_VALUE))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("Alias not found: nonExistingAlias"));
+  }
+
+  @Test
+  void deleteUrlMapping_ExistingAlias_ReturnsNoContent() throws Exception {
+    UrlMapping mapping =
+        UrlMapping.builder()
+            .alias(alias)
+            .fullUrl(fullUrl)
+            .shortUrl(LOCALHOST + alias)
+            .build();
+    urlMappingRepository.save(mapping);
+    assertThat(urlMappingRepository.existsByAlias(alias)).isTrue();
+
+    mockMvc
+        .perform(
+            delete("/" + alias)
+                .contentType(APPLICATION_JSON_VALUE))
+        .andExpect(status().isNoContent());
+
+    assertThat(urlMappingRepository.existsByAlias(alias)).isFalse();
+  }
+
+  @Test
+  void deleteUrlMapping_NonExistingAlias_ReturnsNotFound() throws Exception {
+    mockMvc
+        .perform(
+            delete("/nonExistingAlias")
                 .contentType(APPLICATION_JSON_VALUE))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value("Alias not found: nonExistingAlias"));

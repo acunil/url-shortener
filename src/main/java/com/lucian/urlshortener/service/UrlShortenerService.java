@@ -60,7 +60,12 @@ public class UrlShortenerService {
   }
 
   public void deleteByAlias(String alias) {
-    // throw 404 if not found
+    log.info("Deleting URL mapping for alias: {}", alias);
+    if (!aliasExists(alias)) {
+      log.warn("Alias not found for deletion: {}", alias);
+      throw new AliasNotFoundException(alias);
+    }
+    urlMappingRepository.deleteById(alias);
   }
 
   public List<UrlMapping> listAll() {

@@ -63,10 +63,15 @@ public class UrlShortenerController {
     return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
   }
 
+  @Operation(
+      summary = "Delete a URL mapping",
+      description = "Deletes the URL mapping for the given alias.")
+  @ApiResponse(responseCode = "204", description = "URL mapping deleted successfully")
+  @ApiResponse(responseCode = "404", description = "Alias not found")
   @DeleteMapping("/{alias}")
   public ResponseEntity<?> delete(@PathVariable String alias) {
-    // return 204 or 404
-    return null;
+    urlShortenerService.deleteByAlias(alias);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/urls")

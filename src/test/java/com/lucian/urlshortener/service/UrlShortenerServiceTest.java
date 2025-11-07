@@ -159,4 +159,25 @@ class UrlShortenerServiceTest {
     assertThat(logCaptor.getInfoLogs()).containsExactly("Retrieving URL mapping for alias: myAlias");
   }
 
+  @Test
+  void testDeleteByAlias_found() {
+    when(urlMappingRepository.existsByAlias(REQUESTED_ALIAS)).thenReturn(true);
+    urlShortenerService.deleteByAlias(REQUESTED_ALIAS);
+    verify(urlMappingRepository).existsByAlias(REQUESTED_ALIAS);
+    verify(urlMappingRepository).deleteById(REQUESTED_ALIAS);
+    assertThat(logCaptor.getInfoLogs())
+        .containsExactly("Deleting URL mapping for alias: myAlias");
+  }
+
+  @Test
+  void testDeleteByAlias_notFound() {
+    when(urlMappingRepository.existsByAlias(REQUESTED_ALIAS)).thenReturn(false);
+    assertThatThrownBy(() -> urlShortenerService.deleteByAlias(REQUESTED_ALIAS))
+        .isInstanceOf(AliasNotFoundException.class)
+        .hasMessage("Alias not found: " + REQUESTED_ALIAS);
+    verify(urlMappingRepository).existsByAlias(REQUESTED_ALIAS);
+    verify(urlMappingRepository, never()).deleteById(anyString());
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Deleting URL mapping for alias: myAlias");
+    assertThat(logCaptor.getWarnLogs()).containsExactly("Alias not found for deletion: myAlias");
+  }
 }
