@@ -37,7 +37,6 @@ public class UrlShortenerController {
   @ApiResponse(responseCode = "400", description = "Invalid URL provided")
   @PostMapping("/shorten")
   public ResponseEntity<UrlResponse> shortenUrl(@RequestBody @Valid UrlRequest request) {
-    // return 201 or 400
     log.info(
         "Received shorten URL request for {} with customAlias '{}'", request.fullUrl(), request.customAlias());
     UrlMapping urlMapping =

@@ -1,6 +1,7 @@
 package com.lucian.urlshortener.service;
 
 import com.lucian.urlshortener.entity.UrlMapping;
+import com.lucian.urlshortener.exception.AliasCollisionException;
 import com.lucian.urlshortener.exception.AliasGenerationFailureException;
 import com.lucian.urlshortener.exception.DuplicateAliasException;
 import com.lucian.urlshortener.exception.InvalidAliasException;
@@ -51,7 +52,7 @@ public class UrlShortenerService {
     String candidate = generateUniqueAlias();
     if (urlMappingRepository.existsByAlias(candidate)) {
       // treat as failure
-      throw new IllegalStateException("Generated alias collision, try again");
+      throw new AliasCollisionException();
     }
     return saveMapping(candidate, normalizedUrl);
   }
