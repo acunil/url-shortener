@@ -4,12 +4,9 @@ import com.lucian.urlshortener.entity.UrlMapping;
 import com.lucian.urlshortener.exception.*;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
-
+import com.lucian.urlshortener.utility.UrlUtils;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
-import com.lucian.urlshortener.utility.UrlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,22 +34,21 @@ public class UrlShortenerService {
   private static final int MAX_GENERATION_ATTEMPTS = 5;
 
   @Transactional
-  public UrlMapping createShortUrl(String fullUrl, Optional<String> customAliasOpt) {
+  public UrlMapping createShortUrl(String fullUrl, String customAlias) {
     String normalizedUrl = UrlUtils.normalizeAndValidateUrl(fullUrl);
-
-    if (customAliasOpt.isPresent()) {
-      String requestedAlias = customAliasOpt.get();
-      log.info("Custom alias requested: {}", requestedAlias);
-      validateCustomAlias(requestedAlias);
-      return saveMapping(requestedAlias, normalizedUrl);
+    String aliasToUse;
+    if (customAlias != null && !customAlias.isBlank()) {
+      log.info("Custom alias requested: {}", customAlias);
+      validateCustomAlias(customAlias);
+      aliasToUse = customAlias;
+    } else {
+      aliasToUse = generateUniqueAlias();
+      if (aliasExists(aliasToUse)) {
+        throw new AliasCollisionException();
+      }
     }
-
-    String candidate = generateUniqueAlias();
-    if (urlMappingRepository.existsByAlias(candidate)) {
-      // treat as failure
-      throw new AliasCollisionException();
-    }
-    return saveMapping(candidate, normalizedUrl);
+    UrlMapping mapping = buildMapping(aliasToUse, normalizedUrl);
+    return urlMappingRepository.save(mapping);
   }
 
   public UrlMapping getByAlias(String alias) {
@@ -69,6 +65,7 @@ public class UrlShortenerService {
   }
 
   private String generateUniqueAlias() {
+    log.info("Generating unique alias");
     for (int i = 0; i < MAX_GENERATION_ATTEMPTS; i++) {
       String candidate = aliasGenerator.generate();
       if (!aliasExists(candidate)) return candidate;
@@ -90,17 +87,15 @@ public class UrlShortenerService {
     return urlMappingRepository.existsByAlias(candidate);
   }
 
-  private UrlMapping saveMapping(String alias, String fullUrl) {
-    log.info("Saving URL mapping: {} -> {}", alias, fullUrl);
+  private UrlMapping buildMapping(String alias, String fullUrl) {
+    log.info("Building URL mapping: {} -> {}", alias, fullUrl);
     String shortUrl =
         UriComponentsBuilder.fromUriString(baseUrl).pathSegment(alias).build().toUriString();
-    UrlMapping mapping =
-        UrlMapping.builder()
-            .alias(alias)
-            .fullUrl(fullUrl)
-            .shortUrl(shortUrl)
-            .createdAt(LocalDateTime.now())
-            .build();
-    return urlMappingRepository.save(mapping);
+    return UrlMapping.builder()
+        .alias(alias)
+        .fullUrl(fullUrl)
+        .shortUrl(shortUrl)
+        .createdAt(LocalDateTime.now())
+        .build();
   }
 }

@@ -40,7 +40,7 @@ public class UrlShortenerController {
     log.info(
         "Received shorten URL request for {} with customAlias '{}'", request.fullUrl(), request.customAlias());
     UrlMapping urlMapping =
-        urlShortenerService.createShortUrl(request.fullUrl(), Optional.ofNullable(request.customAlias()));
+        urlShortenerService.createShortUrl(request.fullUrl(), request.customAlias());
     UrlResponse response =
         UrlResponse.builder()
             .shortUrl(urlMapping.getShortUrl())
