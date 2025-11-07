@@ -2,11 +2,12 @@ package com.lucian.urlshortener.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucian.urlshortener.dto.UrlRequest;
+import com.lucian.urlshortener.entity.UrlMapping;
+import com.lucian.urlshortener.repo.UrlMappingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ class UrlShortenerControllerTest {
 
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
+  @Autowired UrlMappingRepository urlMappingRepository;
 
   String fullUrl;
   String alias;
@@ -52,32 +54,29 @@ class UrlShortenerControllerTest {
 
   @Test
   void shortenUrl_InvalidUrl_ReturnsBadRequest() throws Exception {
-    UrlRequest request = new UrlRequest("invalid-url", null);
+    UrlRequest request = new UrlRequest("ftp://upload.com", null);
     mockMvc
         .perform(
             post(SHORTEN_ENDPOINT)
                 .contentType(APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Unsupported URL scheme: ftp"));
   }
 
   @Test
   void shortenUrl_CustomAliasAlreadyExists_ReturnsBadRequest() throws Exception {
-    UrlRequest request1 = new UrlRequest(fullUrl, alias);
-    UrlRequest request2 = new UrlRequest("https://www.another.com", alias);
+    UrlRequest request = new UrlRequest(fullUrl, alias);
+    UrlMapping existingMapping =
+        UrlMapping.builder().shortUrl(fullUrl).alias(alias).fullUrl(fullUrl).build();
+    urlMappingRepository.save(existingMapping);
 
     mockMvc
         .perform(
             post(SHORTEN_ENDPOINT)
                 .contentType(APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(request1)))
-        .andExpect(status().isCreated());
-
-    mockMvc
-        .perform(
-            post(SHORTEN_ENDPOINT)
-                .contentType(APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(request2)))
-        .andExpect(status().isBadRequest());
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Alias already exists: " + alias));
   }
 }
