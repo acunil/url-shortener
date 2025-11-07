@@ -12,6 +12,8 @@ import com.lucian.urlshortener.exception.DuplicateAliasException;
 import com.lucian.urlshortener.exception.ReservedAliasException;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
+
+import java.util.List;
 import java.util.Optional;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
@@ -197,5 +199,28 @@ class UrlShortenerServiceTest {
     verify(urlMappingRepository, never()).deleteById(anyString());
     assertThat(logCaptor.getInfoLogs()).containsExactly("Deleting URL mapping for alias: myAlias");
     assertThat(logCaptor.getWarnLogs()).containsExactly("Alias not found for deletion: myAlias");
+  }
+
+  @Test
+  void testListAll() {
+    UrlMapping mapping1 =
+        UrlMapping.builder()
+            .alias("alias1")
+            .fullUrl("https://example1.com")
+            .shortUrl(BASE_URL + "alias1")
+            .build();
+    UrlMapping mapping2 =
+        UrlMapping.builder()
+            .alias("alias2")
+            .fullUrl("https://example2.com")
+            .shortUrl(BASE_URL + "alias2")
+            .build();
+    when(urlMappingRepository.findAll()).thenReturn(List.of(mapping1, mapping2));
+
+    List<UrlMapping> result = urlShortenerService.listAll();
+
+    assertThat(result).containsExactlyInAnyOrder(mapping1, mapping2);
+    verify(urlMappingRepository).findAll();
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Listing all URL mappings");
   }
 }

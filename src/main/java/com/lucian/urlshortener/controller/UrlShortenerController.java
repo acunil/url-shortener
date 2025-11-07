@@ -65,7 +65,7 @@ public class UrlShortenerController {
   @ApiResponse(responseCode = "204", description = "URL mapping deleted successfully")
   @ApiResponse(responseCode = "404", description = "Alias not found")
   @DeleteMapping("/{alias}")
-  public ResponseEntity<?> delete(@PathVariable String alias) {
+  public ResponseEntity<Void> delete(@PathVariable String alias) {
     urlShortenerService.deleteByAlias(alias);
     return ResponseEntity.noContent().build();
   }
