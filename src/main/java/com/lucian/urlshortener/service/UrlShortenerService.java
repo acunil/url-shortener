@@ -41,7 +41,7 @@ public class UrlShortenerService {
   public UrlMapping createShortUrl(String fullUrl, String customAlias) {
     String normalizedUrl = UrlUtils.normalizeAndValidateUrl(fullUrl);
     String aliasToUse;
-    if (customAlias != null && !customAlias.isBlank()) {
+    if (customAlias != null) {
       log.info("Custom alias requested: {}", customAlias);
       validateCustomAlias(customAlias);
       aliasToUse = customAlias;
