@@ -7,6 +7,8 @@ import com.lucian.urlshortener.utility.AliasGenerator;
 import com.lucian.urlshortener.utility.UrlUtils;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -52,8 +54,9 @@ public class UrlShortenerService {
   }
 
   public UrlMapping getByAlias(String alias) {
-    // throw 404 if not found
-    return null;
+    log.info("Retrieving URL mapping for alias: {}", alias);
+    Optional<UrlMapping> mappingOptional = urlMappingRepository.findById(alias);
+    return mappingOptional.orElseThrow(() -> new AliasNotFoundException(alias));
   }
 
   public void deleteByAlias(String alias) {

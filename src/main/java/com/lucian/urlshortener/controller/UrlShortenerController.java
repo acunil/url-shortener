@@ -9,8 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -50,10 +51,16 @@ public class UrlShortenerController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @Operation(
+      summary = "Redirect to full URL",
+      description = "Redirects to the original full URL for the given alias.")
+  @ApiResponse(responseCode = "302", description = "Redirecting to full URL")
+  @ApiResponse(responseCode = "404", description = "Alias not found")
   @GetMapping("/{alias}")
   public ResponseEntity<UrlResponse> redirect(@PathVariable String alias) {
-    // return 302 or 404
-    return null;
+    UrlMapping mapping = urlShortenerService.getByAlias(alias);
+    URI location = URI.create(mapping.getFullUrl());
+    return ResponseEntity.status(HttpStatus.FOUND).location(location).build();
   }
 
   @DeleteMapping("/{alias}")

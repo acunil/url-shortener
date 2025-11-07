@@ -7,9 +7,11 @@ import static org.mockito.Mockito.*;
 
 import com.lucian.urlshortener.entity.UrlMapping;
 import com.lucian.urlshortener.exception.AliasCollisionException;
+import com.lucian.urlshortener.exception.AliasNotFoundException;
 import com.lucian.urlshortener.exception.DuplicateAliasException;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
+import java.util.Optional;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,4 +129,34 @@ class UrlShortenerServiceTest {
     verify(urlMappingRepository, never()).save(any(UrlMapping.class));
     assertThat(logCaptor.getInfoLogs()).containsExactly("Generating unique alias");
   }
+
+  @Test
+  void testGetByAlias_found() {
+    UrlMapping urlMapping =
+        UrlMapping.builder()
+            .alias(REQUESTED_ALIAS)
+            .fullUrl(FULL_URL)
+            .shortUrl(BASE_URL + REQUESTED_ALIAS)
+            .build();
+    when(urlMappingRepository.findById(REQUESTED_ALIAS)).thenReturn(Optional.of(urlMapping));
+
+    UrlMapping result = urlShortenerService.getByAlias(REQUESTED_ALIAS);
+
+    assertThat(result).isEqualTo(urlMapping);
+    verify(urlMappingRepository).findById(REQUESTED_ALIAS);
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Retrieving URL mapping for alias: myAlias");
+  }
+
+  @Test
+  void testGetByAlias_notFound() {
+    when(urlMappingRepository.findById(REQUESTED_ALIAS)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> urlShortenerService.getByAlias(REQUESTED_ALIAS))
+        .isInstanceOf(AliasNotFoundException.class)
+        .hasMessage("Alias not found: " + REQUESTED_ALIAS);
+
+    verify(urlMappingRepository).findById(REQUESTED_ALIAS);
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Retrieving URL mapping for alias: myAlias");
+  }
+
 }

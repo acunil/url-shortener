@@ -1,7 +1,8 @@
 package com.lucian.urlshortener.controller;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 class UrlShortenerControllerTest {
 
   public static final String SHORTEN_ENDPOINT = "/shorten";
+  public static final String LOCALHOST = "http://localhost/";
 
   @Autowired MockMvc mockMvc;
   @Autowired ObjectMapper objectMapper;
@@ -78,5 +80,59 @@ class UrlShortenerControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.message").value("Alias already exists: " + alias));
+  }
+
+  @Test
+  void shortenUrl_NoAlias_GeneratesAlias() throws Exception {
+    UrlRequest request = new UrlRequest(fullUrl, null);
+    mockMvc
+        .perform(
+            post(SHORTEN_ENDPOINT)
+                .contentType(APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.fullUrl").value(fullUrl))
+        .andExpect(jsonPath("$.alias").isNotEmpty())
+        .andExpect(jsonPath("$.shortUrl").value(startsWith(LOCALHOST)));
+  }
+
+  @Test
+  void shortenUrl_InvalidAlias_ReturnsBadRequest() throws Exception {
+    UrlRequest request = new UrlRequest(fullUrl, "invalid alias!");
+    mockMvc
+        .perform(
+            post(SHORTEN_ENDPOINT)
+                .contentType(APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("Invalid alias format: 'invalid alias!'"));
+  }
+
+  @Test
+  void getUrlMapping_ExistingAlias_ReturnsRedirect() throws Exception {
+    UrlMapping mapping =
+        UrlMapping.builder()
+            .alias(alias)
+            .fullUrl(fullUrl)
+            .shortUrl(LOCALHOST + alias)
+            .build();
+    urlMappingRepository.save(mapping);
+
+    mockMvc
+        .perform(
+            get("/" + alias)
+                .contentType(APPLICATION_JSON_VALUE))
+        .andExpect(status().isFound())
+        .andExpect(header().string("Location", fullUrl));
+  }
+
+  @Test
+  void getUrlMapping_NonExistingAlias_ReturnsNotFound() throws Exception {
+    mockMvc
+        .perform(
+            get("/nonExistingAlias")
+                .contentType(APPLICATION_JSON_VALUE))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.message").value("Alias not found: nonExistingAlias"));
   }
 }
