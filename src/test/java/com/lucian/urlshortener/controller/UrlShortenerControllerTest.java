@@ -52,7 +52,7 @@ class UrlShortenerControllerTest {
   }
 
   @Test
-  void shortenUrl_ValidRequest_ReturnsCreated() throws Exception {
+  void createShortUrl_ValidRequest_ReturnsCreated() throws Exception {
     UrlRequest request = new UrlRequest(fullUrl, alias);
     mockMvc
         .perform(
@@ -66,7 +66,7 @@ class UrlShortenerControllerTest {
   }
 
   @Test
-  void shortenUrl_InvalidUrl_ReturnsBadRequest() throws Exception {
+  void createShortUrl_InvalidUrl_ReturnsBadRequest() throws Exception {
     UrlRequest request = new UrlRequest("ftp://upload.com", null);
     mockMvc
         .perform(
@@ -78,7 +78,7 @@ class UrlShortenerControllerTest {
   }
 
   @Test
-  void shortenUrl_CustomAliasAlreadyExists_ReturnsBadRequest() throws Exception {
+  void createShortUrl_CustomAliasAlreadyExists_ReturnsBadRequest() throws Exception {
     UrlRequest request = new UrlRequest(fullUrl, alias);
     urlMappingRepository.save(urlMapping);
 
@@ -92,7 +92,7 @@ class UrlShortenerControllerTest {
   }
 
   @Test
-  void shortenUrl_NoAlias_GeneratesAlias() throws Exception {
+  void createShortUrl_NoAlias_GeneratesAlias() throws Exception {
     UrlRequest request = new UrlRequest(fullUrl, null);
     mockMvc
         .perform(
@@ -106,7 +106,7 @@ class UrlShortenerControllerTest {
   }
 
   @Test
-  void shortenUrl_InvalidAlias_ReturnsBadRequest() throws Exception {
+  void createShortUrl_InvalidAlias_ReturnsBadRequest() throws Exception {
     UrlRequest request = new UrlRequest(fullUrl, "invalid alias!");
     mockMvc
         .perform(
