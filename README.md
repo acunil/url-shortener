@@ -127,7 +127,7 @@ Assumes repo root contains `backend/` and `frontend/`.
     ```json
     {
       "fullUrl": "https://www.example.com/some/long/url",
-      "customAlias": "myalias" // optional
+      "customAlias": "myalias"
     }
     ```
 - `GET /urls` - List all short URLs
@@ -138,7 +138,7 @@ Assumes repo root contains `backend/` and `frontend/`.
     {
       "alias": "myalias",
       "fullUrl": "https://www.example.com/some/long/url",
-      "shortUrl": "http://localhost:8080/myalias",
+      "shortUrl": "http://localhost:8080/myalias"
     }
     ```
 
