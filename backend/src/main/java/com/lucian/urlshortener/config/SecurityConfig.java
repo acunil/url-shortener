@@ -17,7 +17,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .csrf(AbstractHttpConfigurer::disable)                 // DISABLE CSRF for local dev
+        .csrf(AbstractHttpConfigurer::disable) // DISABLE CSRF for local dev
         .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
     return http.build();
@@ -26,8 +26,8 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:5173")); // your dev frontend
-    config.setAllowedMethods(List.of("GET", "POST", "DELETE", "OPTIONS"));
+    config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+    config.setAllowedMethods(List.of("GET", "POST", "DELETE"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
 

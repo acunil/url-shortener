@@ -7,5 +7,12 @@ services:
     volumes:
       - h2-data:/data/h2
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
 volumes:
   h2-data:
