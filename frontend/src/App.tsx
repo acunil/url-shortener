@@ -23,17 +23,23 @@ export default function App() {
   }, []);
 
   return (
-    <main className="max-w-2xl mx-auto py-10 px-4">
-      <header className="flex items-center gap-3 mb-6">
-        <img
-          src="/favicon.ico"
-          alt="App favicon"
-          className="h-8 w-8"
-        />
+    <main className="max-w-6xl mx-auto py-10 px-4">
+      <header className="w-full flex items-center justify-center gap-3 mb-6">
+        <img src="/favicon.ico" alt="App favicon" className="h-8 w-8" />
         <h1 className="text-2xl font-bold">URL Shortener</h1>
       </header>
-      <ShortenForm onSuccess={fetchUrls} />
-      <UrlList urls={urls} loading={loading} setUrls={setUrls} onRefresh={fetchUrls} />
+
+      <div className="w-full flex justify-center">
+        <div className="w-full max-w-2xl">
+          <ShortenForm onSuccess={fetchUrls} />
+        </div>
+      </div>
+
+      <div className="w-full flex justify-center mt-8">
+        <div className="w-full">
+          <UrlList urls={urls} loading={loading} setUrls={setUrls} onRefresh={fetchUrls} />
+        </div>
+      </div>
     </main>
   );
 }
