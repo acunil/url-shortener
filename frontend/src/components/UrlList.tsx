@@ -1,4 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
+import { deleteAlias } from "@/lib/api";
 import {
   Table,
   TableBody,
@@ -8,13 +11,52 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type UrlEntry = {
+  alias: string;
+  fullUrl: string;
+  shortUrl: string;
+};
+
 type Props = {
-  urls: { alias: string; fullUrl: string; shortUrl: string }[];
+  urls: UrlEntry[];
+  setUrls: (u: UrlEntry[]) => void;
+  // optional: fallback refetch
+  onRefresh?: () => Promise<void>;
   loading: boolean;
 };
 
-export function UrlList({ urls, loading }: Props) {
+export function UrlList({ urls, setUrls, onRefresh, loading }: Props) {
+  const [deleting, setDeleting] = useState<Record<string, boolean>>({});
   if (loading) return <p className="text-sm text-muted-foreground">Loading URLs...</p>;
+
+  async function handleDelete(alias: string) {
+    // optional confirmation
+    if (!confirm(`Delete alias "${alias}"? This cannot be undone.`)) return;
+
+    // optimistic update
+    const prev = urls;
+    const next = urls.filter((u) => u.alias !== alias);
+    setUrls(next);
+    setDeleting((s) => ({ ...s, [alias]: true }));
+
+    try {
+      await deleteAlias(alias);
+      toast.success("Deleted", { description: `Alias "${alias}" was removed.` });
+
+      // If parent prefers to refetch authoritative data
+      if (onRefresh) await onRefresh();
+    } catch (err: any) {
+      // rollback
+      setUrls(prev);
+      toast.error("Delete failed", { description: err?.message ?? "Unknown error" });
+    } finally {
+      setDeleting((s) => {
+        const copy = { ...s };
+        delete copy[alias];
+        return copy;
+      });
+    }
+  }
 
   return (
     <div className="mt-8">
@@ -52,8 +94,13 @@ export function UrlList({ urls, loading }: Props) {
                 </a>
               </TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" disabled>
-                  Delete
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDelete(url.alias)}
+                  disabled={!!deleting[url.alias]}
+                >
+                  {deleting[url.alias] ? "Deleting…" : "Delete"}
                 </Button>
               </TableCell>
             </TableRow>

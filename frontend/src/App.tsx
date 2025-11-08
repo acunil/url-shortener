@@ -4,7 +4,7 @@ import { UrlList } from "@/components/UrlList";
 import { listUrls } from "@/lib/api";
 
 export default function App() {
-  const [urls, setUrls] = useState([]);
+  const [urls, setUrls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function fetchUrls() {
@@ -26,7 +26,7 @@ export default function App() {
     <main className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-2xl font-bold mb-6">URL Shortener</h1>
       <ShortenForm onSuccess={fetchUrls} />
-      <UrlList urls={urls} loading={loading} />
+      <UrlList urls={urls} loading={loading} setUrls={setUrls} onRefresh={fetchUrls} />
     </main>
   );
 }
