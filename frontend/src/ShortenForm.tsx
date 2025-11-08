@@ -25,9 +25,9 @@ export function ShortenForm() {
       }
 
       const data = await res.json();
-      toast({ title: "Shortened!", description: data.shortUrl });
+      toast.success("URL shortened successfully: " + data.shortUrl);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+        toast.error("Error shortening URL: " + err.message);
     } finally {
       setLoading(false);
     }
