@@ -2,7 +2,7 @@
 
 A minimal fullstack URL shortener with a Spring Boot backend and a Vite + React frontend.
 
-![URL Shortener Screenshot](assets/app-preview.png)
+<img src="assets/app-preview.png" alt="URL Shortener Screenshot" width="400" />
 
 ## Table of Contents
 
