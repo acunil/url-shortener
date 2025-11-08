@@ -3,6 +3,7 @@ import { Trash, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { deleteAlias } from "@/lib/api";
+import { Copy } from "lucide-react";
 import {
   Table,
   TableBody,
