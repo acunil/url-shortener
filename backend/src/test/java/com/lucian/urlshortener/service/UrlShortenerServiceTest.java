@@ -12,7 +12,6 @@ import com.lucian.urlshortener.exception.DuplicateAliasException;
 import com.lucian.urlshortener.exception.ReservedAliasException;
 import com.lucian.urlshortener.repo.UrlMappingRepository;
 import com.lucian.urlshortener.utility.AliasGenerator;
-
 import java.util.List;
 import java.util.Optional;
 import nl.altindag.log.LogCaptor;
@@ -57,7 +56,6 @@ class UrlShortenerServiceTest {
     assertThat(logCaptor.getInfoLogs())
         .containsExactly(
             "Custom alias requested: myAlias",
-            "Validating custom alias: myAlias",
             "Building URL mapping: myAlias -> https://www.example.com");
   }
 
@@ -87,21 +85,45 @@ class UrlShortenerServiceTest {
 
     verify(urlMappingRepository).existsByAlias(REQUESTED_ALIAS);
     verify(urlMappingRepository, never()).save(any(UrlMapping.class));
-    assertThat(logCaptor.getInfoLogs())
-        .containsExactly("Custom alias requested: myAlias", "Validating custom alias: myAlias");
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Custom alias requested: myAlias");
   }
 
   @Test
-  void testCreateShortUrl_InvalidCustomAlias() {
-    String invalidAlias = "ab"; // too short
+  void testCreateShortUrl_InvalidCustomAlias_TooShort() {
+    String invalidAlias = "ab";
     when(urlMappingRepository.existsByAlias(invalidAlias)).thenReturn(false);
     assertThatThrownBy(() -> urlShortenerService.createShortUrl(FULL_URL, invalidAlias))
         .isInstanceOf(Exception.class)
-        .hasMessageContaining("Invalid alias format");
+        .hasMessageContaining("Invalid alias 'ab': must be at least 3 characters long");
 
     verifyNoInteractions(urlMappingRepository);
-    assertThat(logCaptor.getInfoLogs())
-        .containsExactly("Custom alias requested: ab", "Validating custom alias: ab");
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Custom alias requested: ab");
+  }
+
+  @Test
+  void testCreateShortUrl_InvalidCustomAlias_TooLong() {
+    String invalidAlias = "a".repeat(65);
+    when(urlMappingRepository.existsByAlias(invalidAlias)).thenReturn(false);
+    assertThatThrownBy(() -> urlShortenerService.createShortUrl(FULL_URL, invalidAlias))
+        .isInstanceOf(Exception.class)
+        .hasMessageContaining(
+            "Invalid alias '%s': must be at most 64 characters long".formatted(invalidAlias));
+
+    verifyNoInteractions(urlMappingRepository);
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Custom alias requested: " + invalidAlias);
+  }
+
+  @Test
+  void testCreateShortUrl_InvalidCustomAlias_InvalidCharacters() {
+    String invalidAlias = "invalid*alias";
+    when(urlMappingRepository.existsByAlias(invalidAlias)).thenReturn(false);
+    assertThatThrownBy(() -> urlShortenerService.createShortUrl(FULL_URL, invalidAlias))
+        .isInstanceOf(Exception.class)
+        .hasMessageContaining(
+            "Invalid alias 'invalid*alias': may contain only letters, digits, hyphens and underscores");
+
+    verifyNoInteractions(urlMappingRepository);
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Custom alias requested: invalid*alias");
   }
 
   @Test
@@ -143,10 +165,7 @@ class UrlShortenerServiceTest {
         .hasMessage("Alias is reserved and cannot be used: " + reservedAlias);
 
     verifyNoInteractions(urlMappingRepository);
-    assertThat(logCaptor.getInfoLogs())
-        .containsExactly(
-            "Custom alias requested: " + reservedAlias,
-            "Validating custom alias: " + reservedAlias);
+    assertThat(logCaptor.getInfoLogs()).containsExactly("Custom alias requested: " + reservedAlias);
   }
 
   @Test

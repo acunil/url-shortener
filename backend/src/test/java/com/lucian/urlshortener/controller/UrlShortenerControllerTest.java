@@ -44,11 +44,7 @@ class UrlShortenerControllerTest {
     fullUrl = "https://www.example.com";
     alias = "myAlias";
     urlMapping =
-        UrlMapping.builder()
-            .alias(alias)
-            .fullUrl(fullUrl)
-            .shortUrl(LOCALHOST + alias)
-            .build();
+        UrlMapping.builder().alias(alias).fullUrl(fullUrl).shortUrl(LOCALHOST + alias).build();
   }
 
   @Test
@@ -114,7 +110,11 @@ class UrlShortenerControllerTest {
                 .contentType(APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message").value("Invalid alias format: 'invalid alias!'"));
+        .andExpect(
+            jsonPath("$.message")
+                .value(
+                    "Invalid alias 'invalid alias!': "
+                        + "may contain only letters, digits, hyphens and underscores"));
   }
 
   @Test
