@@ -2,6 +2,7 @@
 
 A minimal fullstack URL shortener with a Spring Boot backend and a Vite + React frontend.
 
+![URL Shortener Screenshot](assets/app-preview.png)
 
 ## Table of Contents
 
