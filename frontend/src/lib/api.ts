@@ -1,30 +1,47 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
+function readCookie(name: string): string | null {
+    const match = document.cookie.split("; ").find((row) => row.trim().startsWith(name + "="));
+    return match ? decodeURIComponent(match.split("=")[1]) : null;
+}
+
 export async function shortenUrl(fullUrl: string, customAlias?: string) {
+    const xsrf = readCookie("XSRF-TOKEN") ?? "";
+
     const res = await fetch(`${BASE_URL}/shorten`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "X-XSRF-TOKEN": xsrf,
+        },
         body: JSON.stringify({ fullUrl, customAlias }),
     });
 
     if (!res.ok) {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({ message: res.statusText }));
         throw new Error(error.message || "Failed to shorten URL");
     }
 
-    return await res.json(); // { shortUrl }
+    return res.json();
 }
 
 export async function listUrls() {
-    const res = await fetch(`${BASE_URL}/urls`);
+    const res = await fetch(`${BASE_URL}/urls`, { credentials: "include" });
     if (!res.ok) throw new Error("Failed to fetch URLs");
-    return await res.json(); // List of UrlResponse
+    return res.json();
 }
 
 export async function deleteAlias(alias: string) {
-    const res = await fetch(`${BASE_URL}/${alias}`, { method: "DELETE" });
+    const res = await fetch(`${BASE_URL}/${alias}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+            "X-XSRF-TOKEN": readCookie("XSRF-TOKEN") ?? "",
+        },
+    });
     if (!res.ok) {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({ message: res.statusText }));
         throw new Error(error.message || "Failed to delete alias");
     }
 }
