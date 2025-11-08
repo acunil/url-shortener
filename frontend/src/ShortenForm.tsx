@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { shortenUrl } from "@/lib/api";
 
 export function ShortenForm() {
   const [fullUrl, setFullUrl] = useState("");
@@ -13,21 +14,16 @@ export function ShortenForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/shorten", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullUrl, customAlias: customAlias || undefined }),
+      const data = await shortenUrl(fullUrl, customAlias || undefined);
+      toast.success("URL shortened successfully", {
+        description: data.shortUrl,
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to shorten URL");
-      }
-
-      const data = await res.json();
-      toast.success("URL shortened successfully: " + data.shortUrl);
+      setFullUrl("");
+      setCustomAlias("");
     } catch (err: any) {
-        toast.error("Error shortening URL: " + err.message);
+      toast.error("Error shortening URL", {
+        description: err.message,
+      });
     } finally {
       setLoading(false);
     }
