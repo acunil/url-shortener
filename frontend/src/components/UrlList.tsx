@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { listUrls } from "@/lib/api";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,31 +8,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type UrlEntry = {
-  alias: string;
-  shortUrl: string;
-  fullUrl: string;
+type Props = {
+  urls: { alias: string; fullUrl: string; shortUrl: string }[];
+  loading: boolean;
 };
 
-export function UrlList() {
-  const [urls, setUrls] = useState<UrlEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUrls() {
-      try {
-        const data = await listUrls();
-        setUrls(data);
-      } catch (err: any) {
-        toast.error("Failed to load URLs", { description: err.message });
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUrls();
-  }, []);
-
+export function UrlList({ urls, loading }: Props) {
   if (loading) return <p className="text-sm text-muted-foreground">Loading URLs...</p>;
 
   return (

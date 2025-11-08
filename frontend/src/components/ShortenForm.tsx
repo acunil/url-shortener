@@ -5,7 +5,11 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { shortenUrl } from "@/lib/api";
 
-export function ShortenForm() {
+type Props = {
+  onSuccess: () => void;
+};
+
+export function ShortenForm({ onSuccess }: Props) {
   const [fullUrl, setFullUrl] = useState("");
   const [customAlias, setCustomAlias] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,6 +24,7 @@ export function ShortenForm() {
       });
       setFullUrl("");
       setCustomAlias("");
+      onSuccess();
     } catch (err: any) {
       toast.error("Error shortening URL", {
         description: err.message,
