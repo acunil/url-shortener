@@ -5,7 +5,14 @@ function readCookie(name: string): string | null {
     return match ? decodeURIComponent(match.split("=")[1]) : null;
 }
 
+async function ensureCsrf() {
+    if (readCookie("XSRF-TOKEN")) return;
+    await fetch(`${BASE_URL}/urls`, { credentials: "include" });
+}
+
+
 export async function shortenUrl(fullUrl: string, customAlias?: string) {
+    await ensureCsrf();
     const xsrf = readCookie("XSRF-TOKEN") ?? "";
 
     const res = await fetch(`${BASE_URL}/shorten`, {
@@ -33,6 +40,7 @@ export async function listUrls() {
 }
 
 export async function deleteAlias(alias: string) {
+    await ensureCsrf();
     const res = await fetch(`${BASE_URL}/${alias}`, {
         method: "DELETE",
         credentials: "include",
