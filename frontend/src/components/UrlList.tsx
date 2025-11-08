@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Trash, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { deleteAlias } from "@/lib/api";
@@ -66,7 +67,7 @@ export function UrlList({ urls, setUrls, onRefresh, loading }: Props) {
             <TableHead>Alias</TableHead>
             <TableHead>Short URL</TableHead>
             <TableHead>Full URL</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -99,9 +100,17 @@ export function UrlList({ urls, setUrls, onRefresh, loading }: Props) {
                   size="sm"
                   onClick={() => handleDelete(url.alias)}
                   disabled={!!deleting[url.alias]}
+                  aria-label={deleting[url.alias] ? `Deleting ${url.alias}` : `Delete ${url.alias}`}
+                  title={deleting[url.alias] ? "Deleting…" : "Delete"}
+                  className={!!deleting[url.alias] ? "cursor-not-allowed" : "cursor-pointer"}
                 >
-                  {deleting[url.alias] ? "Deleting…" : "Delete"}
+                  {deleting[url.alias] ? (
+                    <Hourglass className="h-4 w-4 animate-pulse" aria-hidden />
+                  ) : (
+                    <Trash className="h-4 w-4" aria-hidden />
+                  )}
                 </Button>
+
               </TableCell>
             </TableRow>
           ))}
