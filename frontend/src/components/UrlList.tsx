@@ -59,63 +59,74 @@ export function UrlList({ urls, setUrls, onRefresh, loading }: Props) {
     }
   }
 
+  function truncateEnd(s: string, max = 50) {
+    if (!s) return s;
+    return s.length > max ? s.slice(0, max - 1) + "…" : s;
+  }
+
+
   return (
     <div className="mt-8">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Alias</TableHead>
-            <TableHead>Short URL</TableHead>
-            <TableHead>Full URL</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {urls.map((url) => (
-            <TableRow key={url.alias}>
-              <TableCell>{url.alias}</TableCell>
-              <TableCell>
-                <a
-                  href={url.shortUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  {url.shortUrl}
-                </a>
-              </TableCell>
-              <TableCell>
-                <a
-                  href={url.fullUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  {url.fullUrl}
-                </a>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(url.alias)}
-                  disabled={!!deleting[url.alias]}
-                  aria-label={deleting[url.alias] ? `Deleting ${url.alias}` : `Delete ${url.alias}`}
-                  title={deleting[url.alias] ? "Deleting…" : "Delete"}
-                  className={!!deleting[url.alias] ? "cursor-not-allowed" : "cursor-pointer"}
-                >
-                  {deleting[url.alias] ? (
-                    <Hourglass className="h-4 w-4 animate-pulse" aria-hidden />
-                  ) : (
-                    <Trash className="h-4 w-4" aria-hidden />
-                  )}
-                </Button>
-
-              </TableCell>
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-300"></div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Alias</TableHead>
+              <TableHead>Short URL</TableHead>
+              <TableHead>Full URL</TableHead>
+              <TableHead></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {urls.map((url) => (
+              <TableRow key={url.alias}>
+                <TableCell>{url.alias}</TableCell>
+                <TableCell>
+                  <a
+                    href={url.shortUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    {url.shortUrl}
+                  </a>
+                </TableCell>
+                <TableCell className="max-w-[28rem]">
+                  <a
+                    href={url.fullUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline block truncate"
+                    title={url.fullUrl}
+                    aria-label={`Open full URL for ${url.alias}`}
+                  >
+                    {truncateEnd(url.fullUrl, 50)}
+                  </a>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(url.alias)}
+                    disabled={!!deleting[url.alias]}
+                    aria-label={deleting[url.alias] ? `Deleting ${url.alias}` : `Delete ${url.alias}`}
+                    title={deleting[url.alias] ? "Deleting…" : "Delete"}
+                    className={!!deleting[url.alias] ? "cursor-not-allowed" : "cursor-pointer"}
+                  >
+                    {deleting[url.alias] ? (
+                      <Hourglass className="h-4 w-4 animate-pulse" aria-hidden />
+                    ) : (
+                      <Trash className="h-4 w-4" aria-hidden />
+                    )}
+                  </Button>
+
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div >
   );
 }
