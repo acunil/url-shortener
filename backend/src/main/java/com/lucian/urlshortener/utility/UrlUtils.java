@@ -13,6 +13,7 @@ public class UrlUtils {
   }
 
   public static String normalizeAndValidateUrl(String url) {
+    // TODO consider allow www. prefixes
     log.info("Normalizing and validating URL: {}", url);
     try {
       URI uri = new URI(url);
