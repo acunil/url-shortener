@@ -56,7 +56,7 @@ export function ShortenForm({ onSuccess }: Props) {
         />
       </div>
       <Button type="submit" disabled={loading}>
-        {loading ? "Shortening..." : "Shorten URL"}
+        {"Shorten URL"}
       </Button>
     </form>
   );
