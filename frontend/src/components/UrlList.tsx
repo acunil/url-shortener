@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Trash, Hourglass } from "lucide-react";
+import CopyButton from "@/components/CopyButton";
 import { toast } from "sonner";
 import { useState } from "react";
 import { deleteAlias } from "@/lib/api";
@@ -91,6 +92,7 @@ export function UrlList({ urls, setUrls, onRefresh, loading }: Props) {
                   >
                     {url.shortUrl}
                   </a>
+                  <CopyButton text={url.shortUrl} />
                 </TableCell>
                 <TableCell className="max-w-[28rem]">
                   <a
