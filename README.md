@@ -104,11 +104,11 @@ npm run dev
 
 ### Docker (recommended)
 
-1. Build and run with docker-compose from repo root
+1. Build and run with docker compose from repo root
 
 ```bash
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose up -d
 ```
 
 2. Containers:
@@ -188,8 +188,7 @@ Run backend locally:
 
 ```bash
 cd backend
-mvn -DskipTests package
-java -jar target/*.jar
+./mvnw spring-boot:run
 ```
 Inspect backend container /data/h2:
 
@@ -207,6 +206,10 @@ there are several areas where I would invest further time and care in a producti
 ### Tech Debt
 - **Security**: CSRF protection is currently disabled for simplicity in local development. In production, I would re-enable CSRF and ensure proper token handling across frontend and backend.
 - **Code Quality**: While I’ve strived for clean, maintainable code, some areas show remnants of active development in aspects which required greater efforts of troubleshooting and investigation. This would be cleaned up and refactored in a production codebase.
+- **Alias Generation**: The current random alias generation is basic but functional. A more robust algorithm would be needed to minimize collisions and ensure URL uniqueness at scale.
+- **Dockerized Ports**: NGINX in the dockerized frontend serves static files but does not proxy API requests. In production, I would configure NGINX to proxy API calls to the backend to simplify CORS and deployment.
+- **Testing**: While backend unit tests are comprehensive, the frontend has no automated test suite. A production system would require thorough end-to-end tests and component tests for the frontend using eg Vitest or Cypress.
+- **Code Modularity**: Some components and services could be further modularized for better separation of concerns and reusability.
 
 ### Future Enhancements
 - **Analytics**: Track click counts and usage stats per short URL.
