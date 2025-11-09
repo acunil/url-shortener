@@ -21,6 +21,9 @@ A minimal fullstack URL shortener with a Spring Boot backend and a Vite + React 
 - [Endpoints](#endpoints)
 - [Notes and Assumptions](#notes-and-assumptions)
 - [Quick command cheatsheet](#quick-command-cheatsheet)
+- [Future Enhancements & Technical Trade-offs](#future-enhancements--technical-trade-offs)
+  - [Tech Debt](#tech-debt)
+  - [Future Enhancements](#future-enhancements)
 
 ## About
 
@@ -87,15 +90,15 @@ Assumes repo root contains `backend/` and `frontend/`.
 #### Frontend
 1. Open new terminal, navigate to frontend
 ```bash
-  cd url-shortener/frontend
+cd url-shortener/frontend
 ```
 2. Install dependencies
 ```bash
-  npm install
+npm install
 ```
 3. Start development server
 ```bash
-  npm run dev
+npm run dev
 ````
 4. Access frontend at http://localhost:5173
 
@@ -104,8 +107,8 @@ Assumes repo root contains `backend/` and `frontend/`.
 1. Build and run with docker-compose from repo root
 
 ```bash
-  docker-compose build
-  docker-compose up -d
+docker-compose build
+docker-compose up -d
 ```
 
 2. Containers:
@@ -162,34 +165,61 @@ Assumes repo root contains `backend/` and `frontend/`.
 Start everything (build + up):
 
 ```bash
-    docker compose build
-    docker compose up -d
+docker compose build
+docker compose up -d
 ```
 
 Rebuild backend only:
 
 ```bash
-    docker compose build backend
-    docker compose up -d backend
+docker compose build backend
+docker compose up -d backend
 ```
 
 Run frontend locally (dev):
 
 ```bash
-    cd frontend
-    npm install
-    npm run dev
+cd frontend
+npm install
+npm run dev
 ```
 
 Run backend locally:
 
 ```bash
-    cd backend
-    mvn -DskipTests package
-    java -jar target/*.jar
+cd backend
+mvn -DskipTests package
+java -jar target/*.jar
 ```
 Inspect backend container /data/h2:
 
 ```bash
-  docker exec -it $(docker ps --filter name=urlshortener-backend -q) sh -c "ls -la /data/h2 || true"
+docker exec -it $(docker ps --filter name=urlshortener-backend -q) sh -c "ls -la /data/h2 || true"
 ```
+
+---
+## Future Enhancements & Technical Trade-offs
+
+This project was developed as part of an interview challenge, and as such, I’ve made conscious trade-offs to prioritize 
+delivering a complete, functional product within a limited timeframe. While the core functionality is solid, 
+there are several areas where I would invest further time and care in a production setting.
+
+### Tech Debt
+- **Security**: CSRF protection is currently disabled for simplicity in local development. In production, I would re-enable CSRF and ensure proper token handling across frontend and backend.
+- **Code Quality**: While I’ve strived for clean, maintainable code, some areas show remnants of active development in aspects which required greater efforts of troubleshooting and investigation. This would be cleaned up and refactored in a production codebase.
+
+### Future Enhancements
+- **Analytics**: Track click counts and usage stats per short URL.
+- **Expiration**: Allow optional expiry dates for short URLs.
+- **Authentication**: Add user accounts and private link management.
+- **Search & filtering**: Improve the frontend table with search, pagination, and sorting.
+- **QR code generation**: Add a button to generate a QR code for each short URL.
+- **Rate limiting**: Prevent abuse of the shortening endpoint.
+- **Admin dashboard**: View usage metrics and manage links.
+- **Database**: Migrate to a persistent database with PostgreSQL and schema migrations using Liquibase.
+- **Observability**: Add structured logs, health checks, and metrics endpoints.
+- **Styling**: Refine spacing, responsiveness, and theming of frontend.
+- **CI/CD**: Set up automated builds, tests, and deployments using GitHub Actions or similar.
+
+This README and the codebase aim to balance clarity, functionality, and pragmatism. I’ve focused on delivering a maintainable, testable foundation that could be extended into a production-ready service with further investment.
+
