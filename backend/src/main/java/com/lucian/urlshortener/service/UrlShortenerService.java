@@ -58,6 +58,7 @@ public class UrlShortenerService {
     return mappingOptional.orElseThrow(() -> new AliasNotFoundException(alias));
   }
 
+  @Transactional
   public void deleteByAlias(String alias) {
     log.info("Deleting URL mapping for alias: {}", alias);
     if (!aliasExists(alias)) {
